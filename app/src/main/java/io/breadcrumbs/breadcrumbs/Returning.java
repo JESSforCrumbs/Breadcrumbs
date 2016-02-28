@@ -34,7 +34,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
-public class Returning extends AppCompatActivity implements LocationListener, SensorEventListener {
+public class Returning extends AppCompatActivity implements LocationListener {
     private LocationManager locationManager;
     private String provider = "gps";
     private boolean enabled;
@@ -48,9 +48,10 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
     private GeomagneticField geoField;
     private Location currentLoc;
     private RotateAnimation ra;
-    private float degree=0f;
-
+    private float degree=0;
     private ImageView arrow;
+    private Location previousLocation;
+    private float prevArrowAngle = 0;
 
 
     @Override
@@ -156,28 +157,18 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
 
     @Override
     public void onLocationChanged(Location location) {
-        double lat = location.getLatitude();
-        double lng = location.getLongitude();
-        geoField = new GeomagneticField(
-                Double.valueOf(location.getLatitude()).floatValue(),
-                Double.valueOf(location.getLongitude()).floatValue(),
-                Double.valueOf(location.getAltitude()).floatValue(),
-                System.currentTimeMillis()
-        );
-
+        updateArrow(location);
+        previousLocation = location;
         if (locations != null) {
-            Location lastLocation = locations.get(locations.size() - 1);
-            if (lastLocation.distanceTo(location) >= 10) {
+            if (locations.get(locations.size() - 1).distanceTo(location) >= 10) {
                 //TODO: need to change updateDist to subtract distance when necessary
                 //TODO: need to figure out when to remove current lastLocation
                 updateDist();
-                myBearing = location.bearingTo(lastLocation);
             }
         } else {
             locations = new ArrayList<>();
             locations.add(location);
         }
-
     }
 
     public void updateDist() {
@@ -186,6 +177,18 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
         distance += prevLoc.distanceTo(currLoc);
         TextView t = (TextView) findViewById(R.id.distance);
         t.setText(distance + " m");
+    }
+
+    public void updateArrow(Location location){
+        float shouldHead = location.bearingTo(locations.get(locations.size() - 1)) % 360;
+        float myHeading = location.bearingTo(previousLocation) % 360;
+        float arrowAngle = (shouldHead - myHeading) % 360;
+        ra = new RotateAnimation(prevArrowAngle, arrowAngle);
+        ra.setDuration(2000);
+        ra.setFillAfter(true);
+        arrow = (ImageView) findViewById(R.id.arrow);
+        arrow.startAnimation(ra);
+        prevArrowAngle = arrowAngle;
     }
 
     @Override
@@ -218,8 +221,6 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -229,40 +230,5 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
         intent.putExtra("locations", locations);
         intent.putExtra("distance", distance);
         startActivity(intent);
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        currentLoc = locationManager.getLastKnownLocation(provider);
-        myBearing = currentLoc.bearingTo(locations.get(locations.size() - 1));
-
-        heading += geoField.getDeclination();
-        heading = myBearing - (myBearing + heading);
-
-        ra = new RotateAnimation(degree, heading, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-
-        ra.setDuration(2000);
-        ra.setFillAfter(true);
-
-        arrow.startAnimation(ra);
-
-
-        degree=heading;
-
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
     }
 }
