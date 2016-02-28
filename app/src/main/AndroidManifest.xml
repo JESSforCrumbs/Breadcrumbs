@@ -31,6 +31,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="io.breadcrumbs.breadcrumbs.MainActivity" />
         </activity>
+        <activity
+            android:name=".Returning"
+            android:label="@string/title_activity_returning"
+            android:parentActivityName=".Walking"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="io.breadcrumbs.breadcrumbs.Walking" />
+        </activity>
     </application>
 
 </manifest>
