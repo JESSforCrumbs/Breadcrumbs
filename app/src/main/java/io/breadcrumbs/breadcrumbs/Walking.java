@@ -24,6 +24,7 @@ public class Walking extends AppCompatActivity implements LocationListener {
     private TextView longitudeField;
     private LocationManager locationManager;
     private String provider = "gps";
+    private ArrayList<Location> locations;
     private boolean enabled;
 
     @Override
@@ -118,10 +119,22 @@ public class Walking extends AppCompatActivity implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-        int lat = (int) (location.getLatitude());
-        int lng = (int) (location.getLongitude());
-        latituteField.setText(String.valueOf(lat));
-        longitudeField.setText(String.valueOf(lng));
+        double lat = location.getLatitude();
+        double lng = location.getLongitude();
+
+        if (locations != null){
+            Location lastLocation = locations.get(locations.size()-1);
+            if(lastLocation.distanceTo(location) >= 10) {
+                latituteField.setText(String.valueOf(lat));
+                longitudeField.setText(String.valueOf(lng));
+                locations.add(location);
+            }
+        }
+        else{
+            locations = new ArrayList();
+            locations.add(location);
+        }
+
     }
 
     @Override
