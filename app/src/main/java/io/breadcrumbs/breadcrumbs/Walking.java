@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class Walking extends AppCompatActivity implements LocationListener {
     private LocationManager locationManager;
@@ -27,6 +28,7 @@ public class Walking extends AppCompatActivity implements LocationListener {
     private ArrayList<Location> locations;
     private boolean enabled;
     private float distance;
+    private long elapsedTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,6 +150,8 @@ public class Walking extends AppCompatActivity implements LocationListener {
         double lat = location.getLatitude();
         double lng = location.getLongitude();
 
+        Long time = location.getTime();
+
         if (locations != null){
             Location lastLocation = locations.get(locations.size()-1);
             if(lastLocation.distanceTo(location) >= 10) {
@@ -160,14 +164,26 @@ public class Walking extends AppCompatActivity implements LocationListener {
             locations.add(location);
         }
 
+        updateTime(time);
+
     }
 
     public void updateDist() {
-        Location currLoc = locations.get(locations.size()-1);
-        Location prevLoc = locations.get(locations.size()-2);
+        Location currLoc = locations.get(locations.size() - 1);
+        Location prevLoc = locations.get(locations.size() - 2);
         distance += prevLoc.distanceTo(currLoc);
         TextView t = (TextView) findViewById(R.id.distance);
         t.setText(distance + " m");
+    }
+
+    public void updateTime(Long time) {
+        long currTime = locations.get(locations.size() - 1).getTime();
+        long prevTime = locations.get(locations.size() - 2).getTime();
+        elapsedTime += currTime - prevTime;
+        long totalTime = elapsedTime + time - currTime;
+        int minutes = (int) ((totalTime / (1000*60)) % 60);
+        TextView t = (TextView) findViewById(R.id.time);
+        t.setText(minutes + " m");
     }
 
     @Override
