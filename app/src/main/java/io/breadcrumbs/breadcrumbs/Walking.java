@@ -16,6 +16,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -37,6 +41,8 @@ public class Walking extends AppCompatActivity implements LocationListener {
         longitudeField = (TextView) findViewById(R.id.TextView04);
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        TextView t = (TextView) findViewById(R.id.distance);
+        t.setText("300 m");
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -81,6 +87,38 @@ public class Walking extends AppCompatActivity implements LocationListener {
                     })
                     .show();
         }
+        TextView u = (TextView) findViewById(R.id.time);
+        u.setText("10 min");
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    /** Called when the user clicks the Drop Crumbs button */
+    public void startReturning(View view) {
+        Intent intent = new Intent(this, Returning.class);
+        startActivity(intent);
     }
 
     /* Request updates at startup */
