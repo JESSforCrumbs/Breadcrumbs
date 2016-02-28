@@ -43,18 +43,15 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
     private float distance;
 
     private float myBearing;
-    private float compassBearing;
+    //private float compassBearing;
     private float heading;
     private GeomagneticField geoField;
     private Location currentLoc;
     private RotateAnimation ra;
-    private float degree=0;
+    private float degree=0f;
 
     private ImageView arrow;
 
-    public Returning(float compassBearing) {
-        this.compassBearing = compassBearing;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -250,12 +247,16 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
         myBearing = currentLoc.bearingTo(locations.get(locations.size() - 1));
 
         heading += geoField.getDeclination();
-        heading =   myBearing - (myBearing + heading);
+        heading = myBearing - (myBearing + heading);
 
         ra = new RotateAnimation(degree, heading, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-        ra.setDuration(100);
+
+        ra.setDuration(2000);
         ra.setFillAfter(true);
+
         arrow.startAnimation(ra);
+
+
         degree=heading;
 
     }
