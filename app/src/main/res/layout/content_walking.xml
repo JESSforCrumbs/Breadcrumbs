@@ -41,5 +41,6 @@
         android:layout_height="wrap_content"
         android:text="Eat Crumbs"
         android:visibility="visible"
-        android:layout_alignParentBottom="true" />
+        android:layout_alignParentBottom="true"
+        android:onClick="startReturning" />
 </LinearLayout>
