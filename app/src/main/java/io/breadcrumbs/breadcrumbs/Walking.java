@@ -167,7 +167,7 @@ public class Walking extends AppCompatActivity implements LocationListener {
         Location prevLoc = locations.get(locations.size()-2);
         distance += prevLoc.distanceTo(currLoc);
         TextView t = (TextView) findViewById(R.id.distance);
-        t.setText(distance + "changed m");
+        t.setText(distance + " m");
     }
 
     @Override
