@@ -98,10 +98,6 @@ public class Walking extends AppCompatActivity implements LocationListener {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -179,5 +175,25 @@ public class Walking extends AppCompatActivity implements LocationListener {
     public void onProviderDisabled(String provider) {
         Toast.makeText(this, "Disabled provider " + provider,
                 Toast.LENGTH_SHORT).show();
+    }
+
+    public void confirmExit(View view){
+        AlertDialog.Builder exitAlert = new AlertDialog.Builder(this);
+        exitAlert.setMessage("Are you sure you want to exit?");
+        exitAlert.setTitle("Confirm Exit");
+        exitAlert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+            }
+        });
+        exitAlert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                Intent i = new Intent(Walking.this, MainActivity.class);
+                startActivity(i);
+            }
+        });
+
+        AlertDialog exit = exitAlert.create();
+        exit.show();
     }
 }

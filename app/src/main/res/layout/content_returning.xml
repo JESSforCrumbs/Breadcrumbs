@@ -17,41 +17,62 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        style="?android:attr/buttonBarStyle">
 
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="Large Text"
             android:id="@+id/distance"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="10dp"
+            android:textSize="48dp"
+            android:layout_weight=".75" />
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="364dp"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:id="@+id/arrow"
             android:src="@drawable/arrow_white"
             android:scaleType="fitCenter"
             android:layout_gravity="top|center_horizontal"
-            android:longClickable="false" />
+            android:longClickable="false"
+            android:layout_weight="2.5" />
 
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="Large Text"
             android:id="@+id/time"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="5dp"
+            android:textSize="48dp"
+            android:layout_weight=".75" />
 
-        <Button
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Drop Crumbs"
-            android:visibility="visible"
-            android:layout_gravity="bottom|center_horizontal"
-            android:layout_alignParentBottom="true"
-            android:onClick="startWalking"/>
+            android:layout_height="0dp"
+            android:layout_weight="0.8">
+
+            <Button
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="visible"
+                android:onClick="startWalking"
+                android:textSize="18sp"
+                android:background="#c8c9d9"
+                android:textColor="#000000"
+                android:text="@string/drop"
+                android:layout_weight="0.5" />
+        </LinearLayout>
+
     </LinearLayout>
 
 
