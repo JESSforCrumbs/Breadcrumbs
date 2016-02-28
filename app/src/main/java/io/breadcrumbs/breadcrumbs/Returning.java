@@ -32,7 +32,7 @@ public class Returning extends AppCompatActivity {
         u.setText("10 min");
 
         ImageView i = (ImageView) findViewById(R.id.arrow);
-        i.setRotation(90);
+        i.setRotation(45);
         i.setColorFilter(Color.BLUE);
         //Drawable.setColorFilter(Color.BLUE , PorterDuff.Mode.MULTIPLY);
 
