@@ -151,6 +151,16 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
         if (locations != null){
             Location lastLocation = locations.get(locations.size()-1);
             if(lastLocation.distanceTo(location) <= 10) {
+                locations.trimToSize();
+                if (locations.size() <= 1) {
+                    distance = 0;
+                    elapsedTime = 0;
+                    TextView d = (TextView) findViewById(R.id.distance);
+                    d.setText(0 + " m");
+                    TextView t = (TextView) findViewById(R.id.time);
+                    t.setText(0 + " min");
+                    return;
+                }
                 updateDist();
                 updateTime(lastLocation);
                 locations.remove(lastLocation);
@@ -172,7 +182,7 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
         Location prevLoc = locations.get(locations.size()-2);
         distance -= prevLoc.distanceTo(currLoc);
         TextView t = (TextView) findViewById(R.id.distance);
-        t.setText((int) distance + " m");
+        t.setText(distance + " m");
     }
 
     public void updateTime(Location lastLocation) {
