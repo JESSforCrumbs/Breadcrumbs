@@ -51,8 +51,10 @@ public class Walking extends AppCompatActivity implements LocationListener {
         TextView t = (TextView) findViewById(R.id.distance);
         t.setText((int) distance + " m");
         TextView u = (TextView) findViewById(R.id.time);
-        int minutes = (int) ((elapsedTime / (1000*60)) % 60);
-        u.setText(minutes + " min");
+        //int minutes = (int) ((elapsedTime / (1000*60)) % 60);
+        //t.setText(minutes + " min");
+        int seconds = (int) (elapsedTime / 1000) % 60 ;
+        u.setText(seconds + " sec");
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
@@ -130,8 +132,10 @@ public class Walking extends AppCompatActivity implements LocationListener {
         TextView t = (TextView) findViewById(R.id.distance);
         t.setText((int) distance + " m");
         TextView u = (TextView) findViewById(R.id.time);
-        int minutes = (int) ((elapsedTime / (1000*60)) % 60);
-        u.setText(minutes + " min");
+        //int minutes = (int) ((elapsedTime / (1000*60)) % 60);
+        //t.setText(minutes + " min");
+        int seconds = (int) (elapsedTime / 1000) % 60 ;
+        u.setText(seconds + " sec");
 
         super.onResume();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -197,9 +201,11 @@ public class Walking extends AppCompatActivity implements LocationListener {
         long prevTime = locations.get(locations.size() - 1).getTime();
         elapsedTime += currTime - prevTime;
         long totalTime = elapsedTime + time - currTime;
-        int minutes = (int) ((totalTime / (1000*60)) % 60);
         TextView t = (TextView) findViewById(R.id.time);
-        t.setText(minutes + " min");
+        //int minutes = (int) ((elapsedTime / (1000*60)) % 60);
+        //t.setText(minutes + " min");
+        int seconds = (int) (elapsedTime / 1000) % 60 ;
+        t.setText(seconds + " sec");
     }
 
     @Override

@@ -39,6 +39,7 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
     private ArrayList<Location> locations;
     private float distance;
     private long elapsedTime;
+    private Location lastSample;
 
     private float myBearing;
     private float compassBearing;
@@ -59,12 +60,16 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
             elapsedTime = extras.getLong("elapsedTime", 0);
         }
 
+        lastSample = locations.get(locations.size()-1);
+
         TextView t = (TextView) findViewById(R.id.distance);
         t.setText((int) distance + " m");
 
         TextView u = (TextView) findViewById(R.id.time);
-        int minutes = (int) ((elapsedTime / (1000*60)) % 60);
-        u.setText(minutes + " min");
+        //int minutes = (int) ((elapsedTime / (1000*60)) % 60);
+        //t.setText(minutes + " min");
+        int seconds = (int) (elapsedTime / 1000) % 60 ;
+        u.setText(seconds + " sec");
 
         ImageView i = (ImageView) findViewById(R.id.arrow);
         i.setRotation(45);
@@ -125,11 +130,15 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
             elapsedTime = extras.getLong("elapsedTime", 0);
         }
 
+        lastSample = locations.get(locations.size()-1);
+
         TextView t = (TextView) findViewById(R.id.distance);
         t.setText((int) distance + " m");
         TextView u = (TextView) findViewById(R.id.time);
-        int minutes = (int) ((elapsedTime / (1000*60)) % 60);
-        u.setText(minutes + " min");
+        //int minutes = (int) ((elapsedTime / (1000*60)) % 60);
+        //t.setText(minutes + " min");
+        int seconds = (int) (elapsedTime / 1000) % 60 ;
+        u.setText(seconds + " sec");
 
         super.onResume();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -167,8 +176,22 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
 
         if (locations != null){
             Location lastLocation = locations.get(locations.size()-1);
-            if(lastLocation.distanceTo(location) <= 10) {
-                locations.trimToSize();
+            if(lastLocation.distanceTo(location) >= 10) {
+                //TODO: what happens if a location gets overshooted
+                if (locations.size() > 1){
+                    Location penultimateLocation = locations.get(locations.size()-2);
+                    float currdist = lastLocation.distanceTo(location);
+                    float prevdist = penultimateLocation.distanceTo(lastLocation);
+
+                    distance -= prevdist;
+
+                    if (prevdist >= currdist){
+                        locations.remove(lastLocation);
+                    }
+                    locations.trimToSize();
+                    Toast.makeText(this, "Array size: " + locations.size(),
+                            Toast.LENGTH_LONG).show();
+                }
                 if (locations.size() <= 1) {
                     distance = 0;
                     elapsedTime = 0;
@@ -178,9 +201,8 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
                     t.setText(0 + " min");
                     return;
                 }
-                updateDist();
-                updateTime(lastLocation);
-                locations.remove(lastLocation);
+                updateDist(location);
+                updateTime(location);
                 //TODO update time
                 //TODO: need to change updateDist to subtract distance when necessary
                 //TODO: need to figure out when to remove current lastLocation
@@ -191,24 +213,26 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
             locations = new ArrayList<>();
             locations.add(location);
         }
-
     }
 
-    public void updateDist() {
-        Location currLoc = locations.get(locations.size()-1);
-        Location prevLoc = locations.get(locations.size()-2);
-        distance -= prevLoc.distanceTo(currLoc);
+    public void updateDist(Location location) {
+        Location prevLoc = locations.get(locations.size()-1);
         TextView t = (TextView) findViewById(R.id.distance);
-        t.setText(distance + " m");
+        t.setText((distance+prevLoc.distanceTo(location)) + " m");
     }
 
-    public void updateTime(Location lastLocation) {
-        long currTime = lastLocation.getTime();
-        long prevTime = locations.get(locations.size() - 1).getTime();
-        elapsedTime -= currTime - prevTime;
-        int minutes = (int) ((elapsedTime / (1000*60)) % 60);
+    public void updateTime(Location location) {
+        long currTime = location.getTime();
+        long prevTime = lastSample.getTime();
+        lastSample = location;
+        long timeDiff = currTime - prevTime;
+        elapsedTime -= timeDiff;
+
         TextView t = (TextView) findViewById(R.id.time);
-        t.setText(minutes + " min");
+        //int minutes = (int) ((elapsedTime / (1000*60)) % 60);
+        //t.setText(minutes + " min");
+        int seconds = (int) (elapsedTime / 1000) % 60 ;
+        t.setText(seconds + " sec");
     }
 
     @Override
