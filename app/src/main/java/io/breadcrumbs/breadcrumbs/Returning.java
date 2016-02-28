@@ -61,7 +61,7 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
         t.setText(distance + " m");
 
         TextView u = (TextView) findViewById(R.id.time);
-        u.setText("10 min");
+        u.setText(elapsedTime + " min");
 
         ImageView i = (ImageView) findViewById(R.id.arrow);
         i.setRotation(45);
@@ -147,15 +147,16 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
 
     @Override
     public void onLocationChanged(Location location) {
-        double lat = location.getLatitude();
-        double lng = location.getLongitude();
 
         if (locations != null){
             Location lastLocation = locations.get(locations.size()-1);
-            if(lastLocation.distanceTo(location) >= 10) {
+            if(lastLocation.distanceTo(location) <= 10) {
+                updateDist();
+                updateTime(lastLocation);
+                locations.remove(lastLocation);
+                //TODO update time
                 //TODO: need to change updateDist to subtract distance when necessary
                 //TODO: need to figure out when to remove current lastLocation
-                updateDist();
                 myBearing = location.bearingTo(lastLocation);
             }
         }
@@ -169,9 +170,18 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
     public void updateDist() {
         Location currLoc = locations.get(locations.size()-1);
         Location prevLoc = locations.get(locations.size()-2);
-        distance += prevLoc.distanceTo(currLoc);
+        distance -= prevLoc.distanceTo(currLoc);
         TextView t = (TextView) findViewById(R.id.distance);
         t.setText((int) distance + " m");
+    }
+
+    public void updateTime(Location lastLocation) {
+        long currTime = lastLocation.getTime();
+        long prevTime = locations.get(locations.size() - 1).getTime();
+        elapsedTime -= currTime - prevTime;
+        int minutes = (int) ((elapsedTime / (1000*60)) % 60);
+        TextView t = (TextView) findViewById(R.id.time);
+        t.setText(minutes + " min");
     }
 
     @Override
