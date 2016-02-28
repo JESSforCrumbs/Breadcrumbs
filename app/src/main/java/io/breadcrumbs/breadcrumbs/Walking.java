@@ -26,6 +26,7 @@ public class Walking extends AppCompatActivity implements LocationListener {
     private String provider = "gps";
     private ArrayList<Location> locations;
     private boolean enabled;
+    private float distance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,9 +38,9 @@ public class Walking extends AppCompatActivity implements LocationListener {
 
         // Placeholder to change later
         TextView t = (TextView) findViewById(R.id.distance);
-        t.setText("300 m");
+        t.setText("0 m");
         TextView u = (TextView) findViewById(R.id.time);
-        u.setText("10 min");
+        u.setText("0 min");
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
@@ -151,6 +152,7 @@ public class Walking extends AppCompatActivity implements LocationListener {
             Location lastLocation = locations.get(locations.size()-1);
             if(lastLocation.distanceTo(location) >= 10) {
                 locations.add(location);
+                updateDist();
             }
         }
         else{
@@ -158,6 +160,14 @@ public class Walking extends AppCompatActivity implements LocationListener {
             locations.add(location);
         }
 
+    }
+
+    public void updateDist() {
+        Location currLoc = locations.get(locations.size()-1);
+        Location prevLoc = locations.get(locations.size()-2);
+        distance += prevLoc.distanceTo(currLoc);
+        TextView t = (TextView) findViewById(R.id.distance);
+        t.setText(distance + "changed m");
     }
 
     @Override
