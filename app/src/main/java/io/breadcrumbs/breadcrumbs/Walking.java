@@ -119,6 +119,20 @@ public class Walking extends AppCompatActivity implements LocationListener {
     /* Request updates at startup */
     @Override
     protected void onResume() {
+        Bundle extras = getIntent().getExtras();
+        //TODO: what if locations was null (i.e. nothing got saved)
+        if (extras != null){
+            locations = extras.getParcelableArrayList("locations");
+            distance = extras.getFloat("distance", 0);
+            elapsedTime = extras.getLong("elapsedTime", 0);
+        }
+
+        TextView t = (TextView) findViewById(R.id.distance);
+        t.setText((int) distance + " m");
+        TextView u = (TextView) findViewById(R.id.time);
+        int minutes = (int) ((elapsedTime / (1000*60)) % 60);
+        u.setText(minutes + " min");
+
         super.onResume();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
