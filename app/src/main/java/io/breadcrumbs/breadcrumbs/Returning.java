@@ -188,7 +188,7 @@ public class Returning extends AppCompatActivity implements LocationListener {
         float shouldHead = location.bearingTo(locations.get(locations.size() - 1)) % 360;
         float myHeading = location.bearingTo(previousLocation) % 360;
         arrowAngle = (shouldHead - myHeading) % 360;
-        ra = new RotateAnimation(prevArrowAngle, arrowAngle);
+        ra = new RotateAnimation(prevArrowAngle, arrowAngle, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         ra.setDuration(2000);
         ra.setFillAfter(true);
         arrow = (ImageView) findViewById(R.id.arrow);
