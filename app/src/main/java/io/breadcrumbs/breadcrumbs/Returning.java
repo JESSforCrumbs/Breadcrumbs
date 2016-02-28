@@ -53,15 +53,17 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
 
         Bundle extras = getIntent().getExtras();
         //TODO: what if locations was null (i.e. nothing got saved)
-        locations = extras.getParcelableArrayList("locations");
-        distance = extras.getFloat("distance", 0);
-        elapsedTime = extras.getLong("elapsedTime", 0);
+        if (extras != null){
+            locations = extras.getParcelableArrayList("locations");
+            distance = extras.getFloat("distance", 0);
+            elapsedTime = extras.getLong("elapsedTime", 0);
+        }
 
         TextView t = (TextView) findViewById(R.id.distance);
-        t.setText(distance + " m");
-
+        t.setText((int) distance + " m");
         TextView u = (TextView) findViewById(R.id.time);
-        u.setText(elapsedTime + " min");
+        int minutes = (int) ((elapsedTime / (1000*60)) % 60);
+        u.setText(minutes + " min");
 
         ImageView i = (ImageView) findViewById(R.id.arrow);
         i.setRotation(45);
