@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.hardware.GeomagneticField;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -25,6 +26,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,6 +44,17 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
 
     private float myBearing;
     private float compassBearing;
+    private float heading;
+    private GeomagneticField geoField;
+    private Location currentLoc;
+    private RotateAnimation ra;
+    private float degree=0;
+
+    private ImageView arrow;
+
+    public Returning(float compassBearing) {
+        this.compassBearing = compassBearing;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,9 +75,9 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
         TextView u = (TextView) findViewById(R.id.time);
         u.setText("10 min");
 
-        ImageView i = (ImageView) findViewById(R.id.arrow);
-        i.setRotation(45);
-        i.setColorFilter(Color.BLUE);
+        arrow = (ImageView) findViewById(R.id.arrow);
+        arrow.setColorFilter(Color.BLUE);
+
         //Drawable.setColorFilter(Color.BLUE , PorterDuff.Mode.MULTIPLY);
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -147,17 +161,22 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
     public void onLocationChanged(Location location) {
         double lat = location.getLatitude();
         double lng = location.getLongitude();
+        geoField = new GeomagneticField(
+                Double.valueOf(location.getLatitude()).floatValue(),
+                Double.valueOf(location.getLongitude()).floatValue(),
+                Double.valueOf(location.getAltitude()).floatValue(),
+                System.currentTimeMillis()
+        );
 
-        if (locations != null){
-            Location lastLocation = locations.get(locations.size()-1);
-            if(lastLocation.distanceTo(location) >= 10) {
+        if (locations != null) {
+            Location lastLocation = locations.get(locations.size() - 1);
+            if (lastLocation.distanceTo(location) >= 10) {
                 //TODO: need to change updateDist to subtract distance when necessary
                 //TODO: need to figure out when to remove current lastLocation
                 updateDist();
                 myBearing = location.bearingTo(lastLocation);
             }
-        }
-        else{
+        } else {
             locations = new ArrayList<>();
             locations.add(location);
         }
@@ -165,8 +184,8 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
     }
 
     public void updateDist() {
-        Location currLoc = locations.get(locations.size()-1);
-        Location prevLoc = locations.get(locations.size()-2);
+        Location currLoc = locations.get(locations.size() - 1);
+        Location prevLoc = locations.get(locations.size() - 2);
         distance += prevLoc.distanceTo(currLoc);
         TextView t = (TextView) findViewById(R.id.distance);
         t.setText(distance + " m");
@@ -204,7 +223,6 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
         int id = item.getItemId();
 
 
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -218,6 +236,27 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        currentLoc = locationManager.getLastKnownLocation(provider);
+        myBearing = currentLoc.bearingTo(locations.get(locations.size() - 1));
+
+        heading += geoField.getDeclination();
+        heading =   myBearing - (myBearing + heading);
+
+        ra = new RotateAnimation(degree, heading, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        ra.setDuration(100);
+        ra.setFillAfter(true);
+        arrow.startAnimation(ra);
+        degree=heading;
 
     }
 
