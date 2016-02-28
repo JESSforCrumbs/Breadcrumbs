@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.hardware.GeomagneticField;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -25,13 +26,15 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 
-public class Returning extends AppCompatActivity implements LocationListener, SensorEventListener {
+public class Returning extends AppCompatActivity implements LocationListener {
     private LocationManager locationManager;
     private String provider = "gps";
     private boolean enabled;
@@ -42,7 +45,16 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
     private Location lastSample;
 
     private float myBearing;
-    private float compassBearing;
+    //private float compassBearing;
+    private float heading;
+    private GeomagneticField geoField;
+    private Location currentLoc;
+    private RotateAnimation ra;
+    private float degree=0;
+    private ImageView arrow;
+    private Location previousLocation;
+    private float prevArrowAngle = 0;
+    private float arrowAngle=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,9 +83,9 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
         int seconds = (int) (elapsedTime / 1000) % 60 ;
         u.setText(seconds + " sec");
 
-        ImageView i = (ImageView) findViewById(R.id.arrow);
-        i.setRotation(45);
-        i.setColorFilter(Color.BLUE);
+        arrow = (ImageView) findViewById(R.id.arrow);
+        arrow.setColorFilter(Color.BLUE);
+
         //Drawable.setColorFilter(Color.BLUE , PorterDuff.Mode.MULTIPLY);
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -204,9 +216,13 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
                 updateDist(location);
                 updateTime(location);
                 //TODO update time
+        if (locations != null) {
+            previousLocation = location;
+            updateArrow(location);
+            if (locations.get(locations.size() - 1).distanceTo(location) >= 10) {
                 //TODO: need to change updateDist to subtract distance when necessary
                 //TODO: need to figure out when to remove current lastLocation
-                myBearing = location.bearingTo(lastLocation);
+                updateDist();
             }
         }
         else{
@@ -233,6 +249,21 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
         //t.setText(minutes + " min");
         int seconds = (int) (elapsedTime / 1000) % 60 ;
         t.setText(seconds + " sec");
+    }
+
+    public void updateArrow(Location location){
+        if (locations.size() <= 0) {
+            return;
+        }
+        float shouldHead = location.bearingTo(locations.get(locations.size() - 1)) % 360;
+        float myHeading = location.bearingTo(previousLocation) % 360;
+        arrowAngle = (shouldHead - myHeading) % 360;
+        ra = new RotateAnimation(prevArrowAngle, arrowAngle, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        ra.setDuration(2000);
+        ra.setFillAfter(true);
+        arrow = (ImageView) findViewById(R.id.arrow);
+        arrow.startAnimation(ra);
+        prevArrowAngle = arrowAngle;
     }
 
     @Override
@@ -265,9 +296,6 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -278,15 +306,5 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
         intent.putExtra("distance", distance);
         intent.putExtra("elapsedTime", elapsedTime);
         startActivity(intent);
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
     }
 }
