@@ -52,6 +52,7 @@ public class Returning extends AppCompatActivity implements LocationListener {
     private ImageView arrow;
     private Location previousLocation;
     private float prevArrowAngle = 0;
+    private float arrowAngle=0;
 
 
     @Override
@@ -157,9 +158,10 @@ public class Returning extends AppCompatActivity implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-        updateArrow(location);
-        previousLocation = location;
+
         if (locations != null) {
+            previousLocation = location;
+            updateArrow(location);
             if (locations.get(locations.size() - 1).distanceTo(location) >= 10) {
                 //TODO: need to change updateDist to subtract distance when necessary
                 //TODO: need to figure out when to remove current lastLocation
@@ -180,9 +182,12 @@ public class Returning extends AppCompatActivity implements LocationListener {
     }
 
     public void updateArrow(Location location){
+        if (locations.size() <= 0) {
+            return;
+        }
         float shouldHead = location.bearingTo(locations.get(locations.size() - 1)) % 360;
         float myHeading = location.bearingTo(previousLocation) % 360;
-        float arrowAngle = (shouldHead - myHeading) % 360;
+        arrowAngle = (shouldHead - myHeading) % 360;
         ra = new RotateAnimation(prevArrowAngle, arrowAngle);
         ra.setDuration(2000);
         ra.setFillAfter(true);
