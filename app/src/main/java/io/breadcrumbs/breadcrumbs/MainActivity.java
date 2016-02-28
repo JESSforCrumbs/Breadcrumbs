@@ -44,12 +44,6 @@ public class MainActivity extends AppCompatActivity {
     /** Called when the user clicks the Drop Crumbs button */
     public void startWalking(View view) {
         Intent intent = new Intent(this, Walking.class);
-
-        ArrayList<Location> locations = null;
-        intent.putExtra("locations", locations);
-        intent.putExtra("distance", 0);
-        intent.putExtra("elapsedTime", 0);
-
         startActivity(intent);
     }
 }

@@ -13,6 +13,7 @@ import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.view.Menu;
@@ -41,15 +42,17 @@ public class Walking extends AppCompatActivity implements LocationListener {
 
         Bundle extras = getIntent().getExtras();
         //TODO: what if locations was null (i.e. nothing got saved)
-        locations = extras.getParcelableArrayList("locations");
-        distance = extras.getFloat("distance", 0);
-        elapsedTime = extras.getLong("elapsedTime", 0);
+        if (extras != null){
+            locations = extras.getParcelableArrayList("locations");
+            distance = extras.getFloat("distance", 0);
+            elapsedTime = extras.getLong("elapsedTime", 0);
+        }
 
-        // Placeholder to change later
         TextView t = (TextView) findViewById(R.id.distance);
-        t.setText("0 m");
+        t.setText((int) distance + " m");
         TextView u = (TextView) findViewById(R.id.time);
-        u.setText("0 min");
+        int minutes = (int) ((elapsedTime / (1000*60)) % 60);
+        u.setText(minutes + " min");
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
