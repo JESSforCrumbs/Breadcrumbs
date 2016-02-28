@@ -2,7 +2,6 @@ package io.breadcrumbs.breadcrumbs;
 
 import android.Manifest;
 import android.app.AlertDialog;
-
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -19,13 +18,10 @@ import android.widget.Toast;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 
 public class Walking extends AppCompatActivity implements LocationListener {
-    private TextView latituteField;
-    private TextView longitudeField;
     private LocationManager locationManager;
     private String provider = "gps";
     private ArrayList<Location> locations;
@@ -37,12 +33,15 @@ public class Walking extends AppCompatActivity implements LocationListener {
         setContentView(R.layout.activity_walking);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        latituteField = (TextView) findViewById(R.id.TextView02);
-        longitudeField = (TextView) findViewById(R.id.TextView04);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        // Placeholder to change later
         TextView t = (TextView) findViewById(R.id.distance);
         t.setText("300 m");
+        TextView u = (TextView) findViewById(R.id.time);
+        u.setText("10 min");
+
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -58,11 +57,7 @@ public class Walking extends AppCompatActivity implements LocationListener {
 
         // Initialize the location fields
         if (location != null) {
-            System.out.println("Provider " + provider + " has been selected.");
             onLocationChanged(location);
-        } else {
-            latituteField.setText("Location not available");
-            longitudeField.setText("Location not available");
         }
 
         enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -87,10 +82,6 @@ public class Walking extends AppCompatActivity implements LocationListener {
                     })
                     .show();
         }
-        TextView u = (TextView) findViewById(R.id.time);
-        u.setText("10 min");
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
     }
 
     @Override
@@ -163,8 +154,6 @@ public class Walking extends AppCompatActivity implements LocationListener {
         if (locations != null){
             Location lastLocation = locations.get(locations.size()-1);
             if(lastLocation.distanceTo(location) >= 10) {
-                latituteField.setText(String.valueOf(lat));
-                longitudeField.setText(String.valueOf(lng));
                 locations.add(location);
             }
         }
