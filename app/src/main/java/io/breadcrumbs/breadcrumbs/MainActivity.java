@@ -46,4 +46,5 @@ public class MainActivity extends AppCompatActivity {
     public void startWalking(View view) {
         Intent intent = new Intent(this, Walking.class);
         startActivity(intent);
-    }}
+    }
+}
