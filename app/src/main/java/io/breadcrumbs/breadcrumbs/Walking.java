@@ -56,12 +56,6 @@ public class Walking extends AppCompatActivity implements LocationListener {
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        Location location = locationManager.getLastKnownLocation(provider);
-
-        // Initialize the location fields
-        if (location != null) {
-            onLocationChanged(location);
-        }
 
         enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         if (!enabled) {
@@ -158,13 +152,12 @@ public class Walking extends AppCompatActivity implements LocationListener {
                 locations.add(location);
                 updateDist();
             }
+            updateTime(time);
         }
         else{
             locations = new ArrayList<>();
             locations.add(location);
         }
-
-        updateTime(time);
 
     }
 
@@ -173,7 +166,7 @@ public class Walking extends AppCompatActivity implements LocationListener {
         Location prevLoc = locations.get(locations.size() - 2);
         distance += prevLoc.distanceTo(currLoc);
         TextView t = (TextView) findViewById(R.id.distance);
-        t.setText(distance + " m");
+        t.setText((int) distance + " m");
     }
 
     public void updateTime(Long time) {
@@ -183,7 +176,7 @@ public class Walking extends AppCompatActivity implements LocationListener {
         long totalTime = elapsedTime + time - currTime;
         int minutes = (int) ((totalTime / (1000*60)) % 60);
         TextView t = (TextView) findViewById(R.id.time);
-        t.setText(minutes + " m");
+        t.setText(minutes + " min");
     }
 
     @Override
