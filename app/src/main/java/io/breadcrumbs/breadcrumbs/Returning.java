@@ -41,6 +41,8 @@ public class Returning extends AppCompatActivity implements LocationListener {
 
     private ArrayList<Location> locations;
     private float distance;
+    private long elapsedTime;
+    private Location lastSample;
 
     private float myBearing;
     //private float compassBearing;
@@ -54,7 +56,6 @@ public class Returning extends AppCompatActivity implements LocationListener {
     private float prevArrowAngle = 0;
     private float arrowAngle=0;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,14 +66,22 @@ public class Returning extends AppCompatActivity implements LocationListener {
 
         Bundle extras = getIntent().getExtras();
         //TODO: what if locations was null (i.e. nothing got saved)
-        locations = extras.getParcelableArrayList("locations");
-        distance = extras.getFloat("distance", 0);
+        if (extras != null){
+            locations = extras.getParcelableArrayList("locations");
+            distance = extras.getFloat("distance", 0);
+            elapsedTime = extras.getLong("elapsedTime", 0);
+        }
+
+        lastSample = locations.get(locations.size()-1);
 
         TextView t = (TextView) findViewById(R.id.distance);
-        t.setText(distance + " m");
+        t.setText((int) distance + " m");
 
         TextView u = (TextView) findViewById(R.id.time);
-        u.setText("10 min");
+        //int minutes = (int) ((elapsedTime / (1000*60)) % 60);
+        //t.setText(minutes + " min");
+        int seconds = (int) (elapsedTime / 1000) % 60 ;
+        u.setText(seconds + " sec");
 
         arrow = (ImageView) findViewById(R.id.arrow);
         arrow.setColorFilter(Color.BLUE);
@@ -125,6 +134,24 @@ public class Returning extends AppCompatActivity implements LocationListener {
     /* Request updates at startup */
     @Override
     protected void onResume() {
+        Bundle extras = getIntent().getExtras();
+        //TODO: what if locations was null (i.e. nothing got saved)
+        if (extras != null){
+            locations = extras.getParcelableArrayList("locations");
+            distance = extras.getFloat("distance", 0);
+            elapsedTime = extras.getLong("elapsedTime", 0);
+        }
+
+        lastSample = locations.get(locations.size()-1);
+
+        TextView t = (TextView) findViewById(R.id.distance);
+        t.setText((int) distance + " m");
+        TextView u = (TextView) findViewById(R.id.time);
+        //int minutes = (int) ((elapsedTime / (1000*60)) % 60);
+        //t.setText(minutes + " min");
+        int seconds = (int) (elapsedTime / 1000) % 60 ;
+        u.setText(seconds + " sec");
+
         super.onResume();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -159,6 +186,36 @@ public class Returning extends AppCompatActivity implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
 
+        if (locations != null){
+            Location lastLocation = locations.get(locations.size()-1);
+            if(lastLocation.distanceTo(location) >= 10) {
+                //TODO: what happens if a location gets overshooted
+                if (locations.size() > 1){
+                    Location penultimateLocation = locations.get(locations.size()-2);
+                    float currdist = lastLocation.distanceTo(location);
+                    float prevdist = penultimateLocation.distanceTo(lastLocation);
+
+                    distance -= prevdist;
+
+                    if (prevdist >= currdist){
+                        locations.remove(lastLocation);
+                    }
+                    locations.trimToSize();
+                    Toast.makeText(this, "Array size: " + locations.size(),
+                            Toast.LENGTH_LONG).show();
+                }
+                if (locations.size() <= 1) {
+                    distance = 0;
+                    elapsedTime = 0;
+                    TextView d = (TextView) findViewById(R.id.distance);
+                    d.setText(0 + " m");
+                    TextView t = (TextView) findViewById(R.id.time);
+                    t.setText(0 + " min");
+                    return;
+                }
+                updateDist(location);
+                updateTime(location);
+                //TODO update time
         if (locations != null) {
             previousLocation = location;
             updateArrow(location);
@@ -167,18 +224,31 @@ public class Returning extends AppCompatActivity implements LocationListener {
                 //TODO: need to figure out when to remove current lastLocation
                 updateDist();
             }
-        } else {
+        }
+        else{
             locations = new ArrayList<>();
             locations.add(location);
         }
     }
 
-    public void updateDist() {
-        Location currLoc = locations.get(locations.size() - 1);
-        Location prevLoc = locations.get(locations.size() - 2);
-        distance += prevLoc.distanceTo(currLoc);
+    public void updateDist(Location location) {
+        Location prevLoc = locations.get(locations.size()-1);
         TextView t = (TextView) findViewById(R.id.distance);
-        t.setText(distance + " m");
+        t.setText((distance+prevLoc.distanceTo(location)) + " m");
+    }
+
+    public void updateTime(Location location) {
+        long currTime = location.getTime();
+        long prevTime = lastSample.getTime();
+        lastSample = location;
+        long timeDiff = currTime - prevTime;
+        elapsedTime -= timeDiff;
+
+        TextView t = (TextView) findViewById(R.id.time);
+        //int minutes = (int) ((elapsedTime / (1000*60)) % 60);
+        //t.setText(minutes + " min");
+        int seconds = (int) (elapsedTime / 1000) % 60 ;
+        t.setText(seconds + " sec");
     }
 
     public void updateArrow(Location location){
@@ -234,6 +304,7 @@ public class Returning extends AppCompatActivity implements LocationListener {
         Intent intent = new Intent(this, Walking.class);
         intent.putExtra("locations", locations);
         intent.putExtra("distance", distance);
+        intent.putExtra("elapsedTime", elapsedTime);
         startActivity(intent);
     }
 }

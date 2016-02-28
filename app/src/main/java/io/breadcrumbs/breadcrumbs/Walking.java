@@ -13,6 +13,7 @@ import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.view.Menu;
@@ -20,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class Walking extends AppCompatActivity implements LocationListener {
     private LocationManager locationManager;
@@ -28,6 +30,7 @@ public class Walking extends AppCompatActivity implements LocationListener {
 
     private ArrayList<Location> locations;
     private float distance;
+    private long elapsedTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,11 +40,21 @@ public class Walking extends AppCompatActivity implements LocationListener {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
-        // Placeholder to change later
+        Bundle extras = getIntent().getExtras();
+        //TODO: what if locations was null (i.e. nothing got saved)
+        if (extras != null){
+            locations = extras.getParcelableArrayList("locations");
+            distance = extras.getFloat("distance", 0);
+            elapsedTime = extras.getLong("elapsedTime", 0);
+        }
+
         TextView t = (TextView) findViewById(R.id.distance);
-        t.setText("0 m");
+        t.setText((int) distance + " m");
         TextView u = (TextView) findViewById(R.id.time);
-        u.setText("0 min");
+        //int minutes = (int) ((elapsedTime / (1000*60)) % 60);
+        //t.setText(minutes + " min");
+        int seconds = (int) (elapsedTime / 1000) % 60 ;
+        u.setText(seconds + " sec");
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
@@ -54,12 +67,6 @@ public class Walking extends AppCompatActivity implements LocationListener {
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
             return;
-        }
-        Location location = locationManager.getLastKnownLocation(provider);
-
-        // Initialize the location fields
-        if (location != null) {
-            onLocationChanged(location);
         }
 
         enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -107,12 +114,29 @@ public class Walking extends AppCompatActivity implements LocationListener {
         Intent intent = new Intent(this, Returning.class);
         intent.putExtra("locations", locations);
         intent.putExtra("distance", distance);
+        intent.putExtra("elapsedTime", elapsedTime);
         startActivity(intent);
     }
 
     /* Request updates at startup */
     @Override
     protected void onResume() {
+        Bundle extras = getIntent().getExtras();
+        //TODO: what if locations was null (i.e. nothing got saved)
+        if (extras != null){
+            locations = extras.getParcelableArrayList("locations");
+            distance = extras.getFloat("distance", 0);
+            elapsedTime = extras.getLong("elapsedTime", 0);
+        }
+
+        TextView t = (TextView) findViewById(R.id.distance);
+        t.setText((int) distance + " m");
+        TextView u = (TextView) findViewById(R.id.time);
+        //int minutes = (int) ((elapsedTime / (1000*60)) % 60);
+        //t.setText(minutes + " min");
+        int seconds = (int) (elapsedTime / 1000) % 60 ;
+        u.setText(seconds + " sec");
+
         super.onResume();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -146,10 +170,11 @@ public class Walking extends AppCompatActivity implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-        double lat = location.getLatitude();
-        double lng = location.getLongitude();
+        Long time = location.getTime();
 
         if (locations != null){
+            updateTime(time, location);
+
             Location lastLocation = locations.get(locations.size()-1);
             if(lastLocation.distanceTo(location) >= 10) {
                 locations.add(location);
@@ -164,11 +189,23 @@ public class Walking extends AppCompatActivity implements LocationListener {
     }
 
     public void updateDist() {
-        Location currLoc = locations.get(locations.size()-1);
-        Location prevLoc = locations.get(locations.size()-2);
+        Location currLoc = locations.get(locations.size() - 1);
+        Location prevLoc = locations.get(locations.size() - 2);
         distance += prevLoc.distanceTo(currLoc);
         TextView t = (TextView) findViewById(R.id.distance);
-        t.setText(distance + " m");
+        t.setText((int) distance + " m");
+    }
+
+    public void updateTime(Long time, Location location) {
+        long currTime = location.getTime();
+        long prevTime = locations.get(locations.size() - 1).getTime();
+        elapsedTime += currTime - prevTime;
+        long totalTime = elapsedTime + time - currTime;
+        TextView t = (TextView) findViewById(R.id.time);
+        //int minutes = (int) ((elapsedTime / (1000*60)) % 60);
+        //t.setText(minutes + " min");
+        int seconds = (int) (elapsedTime / 1000) % 60 ;
+        t.setText(seconds + " sec");
     }
 
     @Override
