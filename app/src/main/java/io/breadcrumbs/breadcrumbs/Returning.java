@@ -38,6 +38,7 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
 
     private ArrayList<Location> locations;
     private float distance;
+    private long elapsedTime;
 
     private float myBearing;
     private float compassBearing;
@@ -54,6 +55,7 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
         //TODO: what if locations was null (i.e. nothing got saved)
         locations = extras.getParcelableArrayList("locations");
         distance = extras.getFloat("distance", 0);
+        elapsedTime = extras.getLong("elapsedTime", 0);
 
         TextView t = (TextView) findViewById(R.id.distance);
         t.setText(distance + " m");
@@ -169,7 +171,7 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
         Location prevLoc = locations.get(locations.size()-2);
         distance += prevLoc.distanceTo(currLoc);
         TextView t = (TextView) findViewById(R.id.distance);
-        t.setText(distance + " m");
+        t.setText((int) distance + " m");
     }
 
     @Override
@@ -213,6 +215,7 @@ public class Returning extends AppCompatActivity implements LocationListener, Se
         Intent intent = new Intent(this, Walking.class);
         intent.putExtra("locations", locations);
         intent.putExtra("distance", distance);
+        intent.putExtra("elapsedTime", elapsedTime);
         startActivity(intent);
     }
 

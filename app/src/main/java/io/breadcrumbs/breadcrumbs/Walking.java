@@ -39,6 +39,12 @@ public class Walking extends AppCompatActivity implements LocationListener {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
+        Bundle extras = getIntent().getExtras();
+        //TODO: what if locations was null (i.e. nothing got saved)
+        locations = extras.getParcelableArrayList("locations");
+        distance = extras.getFloat("distance", 0);
+        elapsedTime = extras.getLong("elapsedTime", 0);
+
         // Placeholder to change later
         TextView t = (TextView) findViewById(R.id.distance);
         t.setText("0 m");
@@ -103,6 +109,7 @@ public class Walking extends AppCompatActivity implements LocationListener {
         Intent intent = new Intent(this, Returning.class);
         intent.putExtra("locations", locations);
         intent.putExtra("distance", distance);
+        intent.putExtra("elapsedTime", elapsedTime);
         startActivity(intent);
     }
 
@@ -142,18 +149,16 @@ public class Walking extends AppCompatActivity implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-        double lat = location.getLatitude();
-        double lng = location.getLongitude();
-
         Long time = location.getTime();
 
         if (locations != null){
+            updateTime(time, location);
+
             Location lastLocation = locations.get(locations.size()-1);
             if(lastLocation.distanceTo(location) >= 10) {
                 locations.add(location);
                 updateDist();
             }
-            updateTime(time);
         }
         else{
             locations = new ArrayList<>();
@@ -170,9 +175,9 @@ public class Walking extends AppCompatActivity implements LocationListener {
         t.setText((int) distance + " m");
     }
 
-    public void updateTime(Long time) {
-        long currTime = locations.get(locations.size() - 1).getTime();
-        long prevTime = locations.get(locations.size() - 2).getTime();
+    public void updateTime(Long time, Location location) {
+        long currTime = location.getTime();
+        long prevTime = locations.get(locations.size() - 1).getTime();
         elapsedTime += currTime - prevTime;
         long totalTime = elapsedTime + time - currTime;
         int minutes = (int) ((totalTime / (1000*60)) % 60);
