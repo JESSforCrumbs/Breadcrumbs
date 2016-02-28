@@ -131,7 +131,7 @@ public class Walking extends AppCompatActivity implements LocationListener {
             }
         }
         else{
-            locations = new ArrayList();
+            locations = new ArrayList<>();
             locations.add(location);
         }
 
