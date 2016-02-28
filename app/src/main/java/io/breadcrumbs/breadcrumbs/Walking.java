@@ -24,8 +24,9 @@ import java.util.ArrayList;
 public class Walking extends AppCompatActivity implements LocationListener {
     private LocationManager locationManager;
     private String provider = "gps";
-    private ArrayList<Location> locations;
     private boolean enabled;
+
+    private ArrayList<Location> locations;
     private float distance;
 
     @Override
@@ -98,14 +99,14 @@ public class Walking extends AppCompatActivity implements LocationListener {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-
         return super.onOptionsItemSelected(item);
     }
 
     /** Called when the user clicks the Drop Crumbs button */
     public void startReturning(View view) {
         Intent intent = new Intent(this, Returning.class);
+        intent.putExtra("locations", locations);
+        intent.putExtra("distance", distance);
         startActivity(intent);
     }
 
